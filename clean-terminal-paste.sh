@@ -53,7 +53,12 @@ perl -0777 -e '
         if ($buf ne "") {
             $buf =~ s/\s+$//;
             $line =~ s/^\s+//;
-            $buf .= " " . $line;
+            # If buffer ends with hyphen inside a URL or long token, join without space
+            if ($buf =~ /\S-$/ && $line =~ /^\S/) {
+                $buf .= $line;
+            } else {
+                $buf .= " " . $line;
+            }
         } else {
             $buf = $line;
         }
