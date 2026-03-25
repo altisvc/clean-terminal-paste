@@ -66,5 +66,20 @@ perl -0777 -e '
         }
     }
     push @out, $buf if $buf ne "";
+
+    # Strip common leading indentation
+    my $min_indent = 9999;
+    for my $l (@out) {
+        next if $l =~ /^\s*$/;  # skip blank lines
+        $l =~ /^( *)/;
+        my $n = length($1);
+        $min_indent = $n if $n < $min_indent;
+    }
+    if ($min_indent > 0 && $min_indent < 9999) {
+        for my $l (@out) {
+            $l =~ s/^ {$min_indent}//;
+        }
+    }
+
     print join("\n", @out) . "\n";
 '
