@@ -33,16 +33,17 @@ The script is smart about what to reflow and what to leave alone:
 
 ## Install
 
+**Mac or Linux:**
 ```bash
-# Download the script
-curl -o ~/.local/bin/c https://raw.githubusercontent.com/altisvc/clean-terminal-paste/main/clean-terminal-paste.sh
-chmod +x ~/.local/bin/c
+sudo curl -fsSL https://raw.githubusercontent.com/altisvc/clean-terminal-paste/main/clean-terminal-paste.sh -o /usr/local/bin/c && sudo chmod +x /usr/local/bin/c
 ```
 
-Make sure `~/.local/bin` is on your PATH. Add this to your `~/.zshrc` if needed:
+**Linux only:** requires `xclip` or `xsel` for clipboard access:
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+sudo apt install xclip
 ```
+
+If `c` isn't found, run `echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc` and try again.
 
 ## Usage
 
@@ -73,7 +74,7 @@ pbpaste | c | pbcopy
 4. Trims trailing whitespace
 5. Forces plain text on clipboard (no rich text formatting leaks)
 
-Pure `perl`. No dependencies beyond a standard macOS/Linux shell.
+Pure `perl`. No dependencies beyond a standard shell. Works on macOS and Linux.
 
 ## License
 

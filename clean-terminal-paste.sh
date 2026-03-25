@@ -90,5 +90,14 @@ if [ "${1:-}" = "--pipe" ]; then
 fi
 
 # Default: clipboard mode
-pbpaste -Prefer txt | clean | pbcopy -Prefer txt
+if [[ "$OSTYPE" == darwin* ]]; then
+    pbpaste -Prefer txt | clean | pbcopy -Prefer txt
+elif command -v xclip &>/dev/null; then
+    xclip -selection clipboard -o | clean | xclip -selection clipboard
+elif command -v xsel &>/dev/null; then
+    xsel --clipboard --output | clean | xsel --clipboard --input
+else
+    echo "No clipboard tool found. Install xclip or xsel." >&2
+    exit 1
+fi
 echo "Clipboard cleaned."
