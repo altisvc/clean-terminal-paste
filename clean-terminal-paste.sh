@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 # clean-terminal-paste.sh
 # Cleans Terminal/Claude Code clipboard output for pasting into docs, Slack, etc.
-# Usage: pbpaste | ./clean-terminal-paste.sh | pbcopy
-#   or:  ./clean-terminal-paste.sh  (reads and writes clipboard directly)
+# Usage: c                    (cleans clipboard in place)
+#        echo "text" | c      (pipe mode, stdin → stdout)
 
 set -euo pipefail
 
-# If no stdin, read from clipboard and write back to clipboard
-if [ -t 0 ]; then
-    pbpaste -Prefer txt | "$0" | pbcopy -Prefer txt
-    echo "Clipboard cleaned."
-    exit 0
-fi
-
-# Single perl pass: strip ANSI, unwrap soft breaks, preserve structure
+clean() {
 perl -0777 -e '
     $_ = <STDIN>;
 
@@ -70,7 +63,7 @@ perl -0777 -e '
     # Strip common leading indentation
     my $min_indent = 9999;
     for my $l (@out) {
-        next if $l =~ /^\s*$/;  # skip blank lines
+        next if $l =~ /^\s*$/;
         $l =~ /^( *)/;
         my $n = length($1);
         $min_indent = $n if $n < $min_indent;
@@ -83,3 +76,14 @@ perl -0777 -e '
 
     print join("\n", @out) . "\n";
 '
+}
+
+# Pipe mode: echo "text" | c --pipe
+if [ "${1:-}" = "--pipe" ]; then
+    clean
+    exit 0
+fi
+
+# Default: clipboard mode
+pbpaste -Prefer txt | clean | pbcopy -Prefer txt
+echo "Clipboard cleaned."
