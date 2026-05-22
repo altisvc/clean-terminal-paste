@@ -7,13 +7,26 @@
 set -euo pipefail
 
 clean() {
-perl -0777 -e '
+perl -CSDA -0777 -e '
     $_ = <STDIN>;
 
     # Strip ANSI escape codes and carriage returns
     s/\e\[[0-9;]*[a-zA-Z]//g;
     s/\e\][^\a]*\a//g;
     s/\r//g;
+
+    # Strip Claude Code / chat UI message-margin markers (vertical bar chars)
+    # ▎ U+258E, ▏ U+258F, ▌ U+258C, ▍ U+258D, │ U+2502, ┃ U+2503, ▕ U+2595
+    # Replace marker + surrounding whitespace with a single space so word boundaries survive.
+    s/\s*[\x{258E}\x{258F}\x{258C}\x{258D}\x{2502}\x{2503}\x{2595}]\s*/ /g;
+
+    # Normalize em-dashes and en-dashes to plain hyphens
+    # Em-dash (—, U+2014) with optional surrounding whitespace → " - "
+    s/\s*\x{2014}\s*/ - /g;
+    # En-dash (–, U+2013) with optional surrounding whitespace → "-" (no spaces, suits numeric ranges)
+    s/\s*\x{2013}\s*/-/g;
+    # Horizontal bar (―, U+2015) → " - "
+    s/\s*\x{2015}\s*/ - /g;
 
     # Trim trailing whitespace per line
     s/[ \t]+$//mg;
@@ -60,6 +73,7 @@ perl -0777 -e '
                 $buf .= " " . $line;
             }
         } else {
+            $line =~ s/^\s+//;
             $buf = $line;
         }
     }
